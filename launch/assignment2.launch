@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<launch>
+    <include file="$(find assignment_2_2023)/launch/assignment1.launch" />
+    <node pkg="r1_assignment_2" type="target_setter" name="target_setter" output="screen" />
+    <node pkg="r1_assignment_2" type="target_server" name="target_server"/>
+    <param name="avg_window_size" type="double" value="10.0" />
+    <node pkg="r1_assignment_2" type="distance_speed_server" name="distance_speed_server" output="screen"/>
+    <node pkg="r1_assignment_2" type="keyboard_parser" name="keyboard_parser" output="screen" />
+</launch>
