@@ -28,7 +28,7 @@ S6344889
 Four separate nodes were created for this assignment: the target setter, target server, distance speed server, and the keyboard parser.
 
 #### Target Setter
-The target setter is an action client to the bug action implemented in assignment_2_2023. The target setter reads in clicked points (```/clicked_point```) from rviz and then sends them to the action server as the goal point. The target setter also listens to the ```/key_in``` topic to get the input from stdin to either set or cancel a target. The target setter listens to the feedback from the server and prints to the console if the state has changed. The target server also subscribes to the ```/odom``` and converts those messages to the custom PosVel messages and publishes them on the ```/posvel``` topic.
+The target setter is an action client to the bug action implemented in assignment_2_2023. The target setter reads in clicked points (```/clicked_point```) from rviz and then sends them to the action server as the goal point. The target setter also uses the ```/key_in``` topic to get the input from the console to either set or cancel a target. The target setter listens to the feedback from the server and prints to the console if the state has changed. The target server also subscribes to the ```/odom``` and converts those messages to the custom PosVel messages and publishes them on the ```/posvel``` topic.
 
 #### Target Server
 When called the target server looks up the target position from the ros parameters "des_pos_x" and "des_pos_y" and then publishes them.
@@ -37,7 +37,7 @@ When called the target server looks up the target position from the ros paramete
 The distance speed server subscribes to the /posvel topic. Every time it receives a posvel message, calls the target server to get the target position. Then it updates its internal storage with the distance of the robot from the target and the average speed. The window used to calculate the average speed is set by the parameter ```avg_window_size```. When the service is called, it returns the distance and average speed.
 
 #### Keyboard Parser
-The keyboard parser reads in the std input and publishes it to the ```/key_in``` topic. This is a separate module from the target setter so it can use blocking functions to read the input and not disturb anything else. 
+The keyboard parser reads in the std input and publishes it to the ```/key_in``` topic. This is a separate module from the target setter so it can use blocking functions to read the input. 
 
 ### Action
 The action folder includes the file that describes the communication between the action client and the action server. This was copied over from the assignment_2_2023 repo.
@@ -71,7 +71,7 @@ Response:\
 ![rqt_graph](./doc/rosgraph.png)
 
 ## Target Setter Pseudocode
-Because the target setter uses many callbacks, it is difficult to create a directional flow. Instead I will write pseudocode for the main function and each of the callback functions.
+Because the target setter uses many callbacks, it is difficult to organize the logic into a flowchart. Instead I will write pseudocode for the main function and each of the callback functions.
 
 ### Main
 
@@ -79,9 +79,9 @@ Because the target setter uses many callbacks, it is difficult to create a direc
 Initialize ros node
 Create Action client
 
-Create subscriber to /clicked_point with callback clicked_point_callback
-Create subscriber to /odom with callback odom_callback
-Create subscriber to /key_in with callback key_callback
+Create subscriber to /clicked_point with callback=clicked_point_callback
+Create subscriber to /odom with callback=odom_callback
+Create subscriber to /key_in with callback=key_callback
 Create publisher to /posvel
 
 Wait for action server
@@ -136,13 +136,15 @@ else
 
 ## Operating Instructions
 
+This package requires the provided assignment_2_2023 package to be installed.
+
 ### Launching
 
 In your catkin workspace, run catkin_make. Then launch the following
 ```
 roslaunch r1_assignment_2 assignment2.launch
 ```
-Check that you can see the laser scan in rviz. If not, replace the robot2_laser.gazebo file with the one in the melodic_laser branch of the robot_description repo.
+IMPORTANT: Check that you can see the laser scan in rviz. If not, replace the robot2_laser.gazebo file with the one in the melodic_laser branch of the robot_description repo.
 
 ### Setting Targets
 
@@ -162,8 +164,7 @@ rosservice call /get_distance_speed
 ```
 ## Possible Improvements
 
-This first possible improvement woud be adding a map to the rviz window so the user can see the map of the environment when picking their desired target point. The distance server also currently needs to store the whole window size worth of speeds. If the way the average was calculated was changed to ```avg(t) = (1-alpha)avg(t-1) + alpha * speed(t)```, then only the aveage would need to be stored and the alpha parameter can be used similar to the window size.
-
-Right now the for the keyboard input is rather rudimentary. If the user inputs a capital T and then doesn't put the position in, it does not raise a bad input error. The goal position is kept the same but sent again as a new goal.
-
-Also someitmes the robot accelerates so fast that it does a wheelie. This should be  avoided as once it got stuck in a wheelie on the wall and could not move out of that position.
+* Adding an environment map to the rviz window so the user more easily see where to put the target point. 
+* The distance server currently needs to store the whole window size worth of speeds. If the way the average was calculated was changed to ```avg(t) = (1-alpha)avg(t-1) + alpha * speed(t)```, then only the aveage would need to be stored and the alpha parameter can be used similar to the window size.
+* Right now the error checking for the keyboard input is rather rudimentary. If the user inputs a capital T and then doesn't put the position in, it does not report an incorrect input. The goal position is kept the same but sent again as a new goal.
+* Sometimes the robot accelerates so fast that it does a wheelie. This is probably not desired behavior in a confined area.
