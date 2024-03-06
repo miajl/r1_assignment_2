@@ -1,3 +1,32 @@
+/**
+ * \file target_setter.cpp
+ * \brief Sends goal targets to the action server
+ * \author Mia La Rocca
+ * \version 0.1
+ * \date 06/03/2024
+ * \param [in]world_width Definethe widthofthediscretizedworld.
+ *
+ *\details
+ *
+ * Subscribes to:<BR>
+ *  °/clicked_point
+ *  °/odom
+ *  °/key_in
+ *
+ * Publishes to: <BR>
+ *  °/posvel
+ *
+ * Client of:<BR>
+ *  °/reaching_goal
+ *
+ *Description:
+ *
+ * This node takes in input from the user either from the command line or from
+ *clicked points and sets it as the goal position for the robot. It also takes
+ *the odometry messages and reformats it to posvel message types.
+ *
+ */
+
 #include <actionlib/client/simple_action_client.h>
 #include <actionlib/client/terminal_state.h>
 #include <r1_assignment_2/PlanningAction.h>

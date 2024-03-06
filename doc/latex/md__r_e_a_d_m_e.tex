@@ -1,0 +1,137 @@
+Mia La Rocca\textbackslash{} S6344889\hypertarget{md__r_e_a_d_m_e_autotoc_md1}{}\doxysection{Components}\label{md__r_e_a_d_m_e_autotoc_md1}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{├── action}
+\DoxyCodeLine{│   └── Planning.action}
+\DoxyCodeLine{├── CMakeLists.txt}
+\DoxyCodeLine{├── launch}
+\DoxyCodeLine{│   └── assignment2.launch}
+\DoxyCodeLine{├── msg}
+\DoxyCodeLine{│   └── PosVel.msg}
+\DoxyCodeLine{├── package.xml}
+\DoxyCodeLine{├── README.md}
+\DoxyCodeLine{├── src}
+\DoxyCodeLine{│   ├── distance\_speed\_server.cpp}
+\DoxyCodeLine{│   ├── keyboard\_parser.cpp}
+\DoxyCodeLine{│   ├── target\_server.cpp}
+\DoxyCodeLine{│   └── target\_setter.cpp}
+\DoxyCodeLine{└── srv}
+\DoxyCodeLine{    ├── DistanceSpeed.srv}
+\DoxyCodeLine{    └── Target.srv}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md2}{}\doxysubsection{Source Code}\label{md__r_e_a_d_m_e_autotoc_md2}
+Four separate nodes were created for this assignment\+: the target setter, target server, distance speed server, and the keyboard parser.\hypertarget{md__r_e_a_d_m_e_autotoc_md3}{}\doxysubsubsection{Target Setter}\label{md__r_e_a_d_m_e_autotoc_md3}
+The target setter is an action client to the bug action implemented in assignment\+\_\+2\+\_\+2023. The target setter reads in clicked points ({\ttfamily /clicked\+\_\+point}) from rviz and then sends them to the action server as the goal point. The target setter also listens to the {\ttfamily /key\+\_\+in} topic to get the input from stdin to either set or cancel a target. The target setter listens to the feedback from the server and prints to the console if the state has changed. The target server also subscribes to the {\ttfamily /odom} and converts those messages to the custom Pos\+Vel messages and publishes them on the {\ttfamily /posvel} topic.\hypertarget{md__r_e_a_d_m_e_autotoc_md4}{}\doxysubsubsection{Target Server}\label{md__r_e_a_d_m_e_autotoc_md4}
+When called the target server looks up the target position from the ros parameters \char`\"{}des\+\_\+pos\+\_\+x\char`\"{} and \char`\"{}des\+\_\+pos\+\_\+y\char`\"{} and then publishes them.\hypertarget{md__r_e_a_d_m_e_autotoc_md5}{}\doxysubsubsection{Distance Speed Server}\label{md__r_e_a_d_m_e_autotoc_md5}
+The distance speed server subscribes to the /posvel topic. Every time it receives a posvel message, calls the target server to get the target position. Then it updates its internal storage with the distance of the robot from the target and the average speed. The window used to calculate the average speed is set by the parameter {\ttfamily avg\+\_\+window\+\_\+size}. When the service is called, it returns the distance and average speed.\hypertarget{md__r_e_a_d_m_e_autotoc_md6}{}\doxysubsubsection{Keyboard Parser}\label{md__r_e_a_d_m_e_autotoc_md6}
+The keyboard parser reads in the std input and publishes it to the {\ttfamily /key\+\_\+in} topic. This is a separate module from the target setter so it can use blocking functions to read the input and not disturb anything else.\hypertarget{md__r_e_a_d_m_e_autotoc_md7}{}\doxysubsection{Action}\label{md__r_e_a_d_m_e_autotoc_md7}
+The action folder includes the file that describes the communication between the action client and the action server. This was copied over from the assignment\+\_\+2\+\_\+2023 repo. \hypertarget{md__r_e_a_d_m_e_autotoc_md8}{}\doxysubsection{Launch}\label{md__r_e_a_d_m_e_autotoc_md8}
+The launch folder includes a launch file that launches the simulation environment, provided action server, and the four nodes created for this assignment. \hypertarget{md__r_e_a_d_m_e_autotoc_md9}{}\doxysubsection{Messages}\label{md__r_e_a_d_m_e_autotoc_md9}
+A new custom message was created to describe the robots motion.\textbackslash{} Pos\+Vel.\+msg\+:\textbackslash{} \enskip{}\enskip{}x (float64)\+: x position of the robot\textbackslash{} \enskip{}\enskip{}y (float64)\+: y position of the robot\textbackslash{} \enskip{}\enskip{}vel\+\_\+x (float64)\+: linear speed of the robot in the x direction\textbackslash{} \enskip{}\enskip{}vel\+\_\+z (float 64)\+: angular speed of the robot in the z direction \hypertarget{md__r_e_a_d_m_e_autotoc_md10}{}\doxysubsection{Services}\label{md__r_e_a_d_m_e_autotoc_md10}
+Two service messages were created. One takes no arguments as a request and returns the target\textquotesingle{}s x and y position. The second takes no arguments as a request and returns the robot\textquotesingle{}s distance from the target and its average linear speed.
+
+Target.\+srv\+:\textbackslash{} Request\+:\textbackslash{} \enskip{}\enskip{}\mbox{[}None\mbox{]}\textbackslash{} Response\+:\textbackslash{} \enskip{}\enskip{}target\+\_\+x (float64)\+: x position of the target\textbackslash{} \enskip{}\enskip{}target\+\_\+y (float64)\+: y position of the target
+
+Distance\+Speed.\+srv\+:\textbackslash{} Request\+:\textbackslash{} \enskip{}\enskip{}\mbox{[}None\mbox{]}\textbackslash{} Response\+:\textbackslash{} \enskip{}\enskip{}distance (float64)\+: distance between robot and target\textbackslash{} \enskip{}\enskip{}average\+\_\+speed (float64)\+: average speed of the robot (taken with a parameter defined window size)\hypertarget{md__r_e_a_d_m_e_autotoc_md11}{}\doxysection{RQT Graph}\label{md__r_e_a_d_m_e_autotoc_md11}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md12}{}\doxysection{Target Setter Pseudocode}\label{md__r_e_a_d_m_e_autotoc_md12}
+Because the target setter uses many callbacks, it is difficult to create a directional flow. Instead I will write pseudocode for the main function and each of the callback functions.\hypertarget{md__r_e_a_d_m_e_autotoc_md13}{}\doxysubsection{Main}\label{md__r_e_a_d_m_e_autotoc_md13}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Initialize ros node}
+\DoxyCodeLine{Create Action client}
+\DoxyCodeLine{}
+\DoxyCodeLine{Create subscriber to /clicked\_point with callback clicked\_point\_callback}
+\DoxyCodeLine{Create subscriber to /odom with callback odom\_callback}
+\DoxyCodeLine{Create subscriber to /key\_in with callback key\_callback}
+\DoxyCodeLine{Create publisher to /posvel}
+\DoxyCodeLine{}
+\DoxyCodeLine{Wait for action server}
+\DoxyCodeLine{Display instructions for setting target}
+\DoxyCodeLine{}
+\DoxyCodeLine{spin}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md14}{}\doxysubsection{done\+Cb (\+Action Client)}\label{md__r_e_a_d_m_e_autotoc_md14}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Print finish state}
+\DoxyCodeLine{Display instructions for setting target}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md15}{}\doxysubsection{active\+Cb (\+Action Client)}\label{md__r_e_a_d_m_e_autotoc_md15}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{Print that goal went active}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md16}{}\doxysubsection{feedback\+Cb (\+Action Client)}\label{md__r_e_a_d_m_e_autotoc_md16}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{if (current action state is not previous action state)}
+\DoxyCodeLine{    print state and position}
+\DoxyCodeLine{    previous action state = current action state}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md17}{}\doxysubsection{clicked\+\_\+point\+\_\+callback}\label{md__r_e_a_d_m_e_autotoc_md17}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{cancel all action server goals}
+\DoxyCodeLine{set goal x, y to equal clicked point x, y}
+\DoxyCodeLine{publish new goal to action server}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md18}{}\doxysubsection{odom\+\_\+callback}\label{md__r_e_a_d_m_e_autotoc_md18}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{create posvel message object}
+\DoxyCodeLine{assign posvel.x to equal odom x}
+\DoxyCodeLine{assign posvel.y to equal odom y}
+\DoxyCodeLine{assign posvel.vel\_x to equal odom linear x velocity}
+\DoxyCodeLine{assign posvel.vel\_z to equal odom angular z velocity}
+\DoxyCodeLine{publish posvel to the /posvel topic}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md19}{}\doxysubsection{key\+\_\+callback}\label{md__r_e_a_d_m_e_autotoc_md19}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{if the first character of the message is 'x' or 'X'}
+\DoxyCodeLine{  cancel all action server goals}
+\DoxyCodeLine{else if the first character of the message is 'T'}
+\DoxyCodeLine{  parse the message to get the x, y}
+\DoxyCodeLine{  cancel all action server goals}
+\DoxyCodeLine{  publish new goal position}
+\DoxyCodeLine{else }
+\DoxyCodeLine{  print bad input}
+
+\end{DoxyCode}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md20}{}\doxysection{Operating Instructions}\label{md__r_e_a_d_m_e_autotoc_md20}
+\hypertarget{md__r_e_a_d_m_e_autotoc_md21}{}\doxysubsection{Launching}\label{md__r_e_a_d_m_e_autotoc_md21}
+In your catkin workspace, run catkin\+\_\+make. Then launch the following 
+\begin{DoxyCode}{0}
+\DoxyCodeLine{roslaunch r1\_assignment\_2 assignment2.launch}
+
+\end{DoxyCode}
+ Check that you can see the laser scan in rviz. If not, replace the robot2\+\_\+laser.\+gazebo file with the one in the melodic\+\_\+laser branch of the robot\+\_\+description repo.\hypertarget{md__r_e_a_d_m_e_autotoc_md22}{}\doxysubsection{Setting Targets}\label{md__r_e_a_d_m_e_autotoc_md22}
+To indicate a target for the robot, click the publish point in rviz and then click on the grid. Currently rviz only allows the user to click on the grid. A point will only be published if there is a small orange symbol next to the cursor when clicking on the grid. To expand the grid in rviz to the full size of the environment, set the grid plane cell count parameter to 18.
+
+A target can also be indicated by typing its coordinates as \textquotesingle{}T\+:\mbox{[}x\mbox{]},\mbox{[}y\mbox{]}\textquotesingle{} + Enter (e.\+g. T\+:4.\+5,6.\+3) in the console window that you launched from.
+
+To cancel a target type an \textquotesingle{}x\textquotesingle{} or \textquotesingle{}X\textquotesingle{} into the console window that you launched from.\hypertarget{md__r_e_a_d_m_e_autotoc_md23}{}\doxysubsection{Using the Target Server}\label{md__r_e_a_d_m_e_autotoc_md23}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{rosservice call /get\_target}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md24}{}\doxysubsection{Using the Distance Speed Server}\label{md__r_e_a_d_m_e_autotoc_md24}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{rosservice call /get\_distance\_speed}
+
+\end{DoxyCode}
+ \hypertarget{md__r_e_a_d_m_e_autotoc_md25}{}\doxysection{Possible Improvements}\label{md__r_e_a_d_m_e_autotoc_md25}
+This first possible improvement woud be adding a map to the rviz window so the user can see the map of the environment when picking their desired target point. The distance server also currently needs to store the whole window size worth of speeds. If the way the average was calculated was changed to {\ttfamily avg(t) = (1-\/alpha)avg(t-\/1) + alpha $\ast$ speed(t)}, then only the aveage would need to be stored and the alpha parameter can be used similar to the window size.
+
+Right now the for the keyboard input is rather rudimentary. If the user inputs a capital T and then doesn\textquotesingle{}t put the position in, it does not raise a bad input error. The goal position is kept the same but sent again as a new goal.
+
+Also someitmes the robot accelerates so fast that it does a wheelie. This should be avoided as once it got stuck in a wheelie on the wall and could not move out of that position. 
